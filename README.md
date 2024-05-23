@@ -77,6 +77,6 @@ The script performs the following steps:
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-# Acknowledgments
+## Acknowledgments
 - ics library
 - pytz library
