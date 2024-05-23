@@ -118,7 +118,7 @@ def read_events_from_csv(csv_file):
 # Creates ics file
 def create_ics_file(events, output_ics_file):
     calendar = Calendar()
-    pst = pytz.timezone('America/Los_Angeles')
+    pst = pytz.timezone('America/Los_Angeles') # TODO: Make this option in command line
     
     for event in events:
         cal_event = Event()
