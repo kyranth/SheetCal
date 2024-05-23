@@ -18,9 +18,9 @@ pip install ics pytz
 Input CSV Format
 The input CSV file should have the following columns:
 
-- **Date (e.g., `"24-May"`, `"25-May"`)**
-- **Times in 2-hour intervals (e.g., `"8AM - 10AM"`, `"10AM - 12PM"`)**
-- **Employee names in the intersections of dates and times.**
+- Date (e.g., `"24-May"`, `"25-May"`)
+- Times in 2-hour intervals (e.g., `"8AM - 10AM"`, `"10AM - 12PM"`)
+- Employee names in the intersections of dates and times.
 
 ## Example
 
@@ -54,24 +54,24 @@ The script outputs an ICS file with the following fields for each event:
 ## Code Overview
 The script performs the following steps:
 
-1. Read and Clean CSV Data:
+**1. Read and Clean CSV Data:**
    - Reads the CSV file.
    - Cleans headers, times, and data cells.
    - Removes empty characters.
 
-2. Convert to Nested Dictionary:
-   - Constructs a nested dictionary with dates as keys and employee names and their shifts as values.
-   - Merges time blocks for the same employee on the same date.
+**2. Convert to Nested Dictionary:**
+   - Constructs a nested dictionary with dates as keys connected to another dictionary with event names keys and their times as values.
+   - Merges time blocks for the same event on the same date.
    - Formats dates and times correctly.
 
-3. Convert to Events:
+**3. Convert to Events:**
    - Converts the nested dictionary into a list of event dictionaries.
 
-4. Write to ICS File:
+**4. Write to ICS File:**
    - Creates an ICS file from the list of events.
    - Sets the time zone to PST.
 
-5. Print Schedule:
+**5. Print Schedule:**
    - Prints the schedule to the console for verification.
 
 ## License
