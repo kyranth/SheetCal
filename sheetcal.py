@@ -7,6 +7,20 @@ from datetime import datetime
 import pytz
 
 def clean_data(headers, times, data):
+    """
+    Cleans the provided headers, times, and data.
+
+    Parameters:
+    headers (list of str): The list of header strings, typically dates, that need to be stripped of leading and trailing whitespace.
+    times (list of str): The list of time strings that need to be stripped of leading and trailing whitespace. Empty strings or strings with only whitespace are removed.
+    data (list of list of str): The 2D list representing rows of data, where each cell in a row needs to be stripped of leading and trailing whitespace. Empty cells are replaced with an empty string.
+
+    Returns:
+    tuple: A tuple containing three elements:
+        - cleaned_headers (list of str): The cleaned list of headers.
+        - cleaned_times (list of str): The cleaned list of times with no empty or whitespace-only strings.
+        - cleaned_data (list of list of str): The cleaned 2D list of data with all cells stripped of whitespace and empty cells replaced with empty strings.
+    """
     # Clean headers (dates)
     cleaned_headers = [header.strip() for header in headers]
     
@@ -22,6 +36,18 @@ def clean_data(headers, times, data):
     return cleaned_headers, cleaned_times, cleaned_data
 
 def read_schedule(csv_file):
+    """
+    Reads a schedule from a CSV file and cleans the data.
+
+    Parameters:
+    csv_file (str): The path to the CSV file to be read.
+
+    Returns:
+    tuple: A tuple containing three elements:
+        - headers (list of str): The cleaned list of headers from the CSV file.
+        - times (list of str): The cleaned list of times from the first column of the CSV file, excluding the header.
+        - data (list of list of str): The cleaned 2D list of data from the CSV file, excluding the first column and the header.
+    """
     with open(csv_file, mode='r') as file:
         reader = csv.reader(file)
         headers = next(reader)
@@ -45,14 +71,34 @@ def read_schedule(csv_file):
     return headers, times, data
 
 def format_time(time_str):
+    """
+    Formats a time string from a 12-hour clock format without minutes to a standard 12-hour clock format with minutes.
+
+    Parameters:
+    time_str (str): A string representing the time in the format '%I%p', where '%I' is the hour (01 to 12) and '%p' is AM or PM.
+    
+    Returns:
+    str: The formatted time string in the format '%I:%M %p', where '%I' is the hour (01 to 12), '%M' are minutes (always '00' in this case), and '%p' is AM or PM.
+    """
     return datetime.strptime(time_str, '%I%p').strftime('%I:%M %p')
 
 def convert_to_nested_dict(headers, times, data):
+    """
+    Converts provided data into a nested dictionary for readability and parsing.
+
+    Parameters:
+    headers (list of str): The list of header strings of dates
+    times (list of str): The list of time strings
+    data (list of list of str): The 2D list representing rows of data
+    """
     schedule = {}
     
     def format_date(date_str):
-        date_obj = datetime.strptime(date_str, '%d-%b')
-        formatted_date = date_obj.strftime('%B %d, 2024')
+        input_format = '%d/%b' # <- the input csv file format
+        date_obj = datetime.strptime(date_str, input_format)
+
+        output_format = '%B %d, 2024' # <- formats the output csv file like this
+        formatted_date = date_obj.strftime(output_format)
         return formatted_date
 
     headers = [format_date(date) for date in headers[1:]]  # Skip the first column header
@@ -78,6 +124,22 @@ def convert_to_nested_dict(headers, times, data):
     return schedule
 
 def convert_to_events(schedule):
+    """
+    Converts a schedule dictionary into a list of event dictionaries.
+
+    Parameters:
+    schedule (dict): A dictionary where keys are dates (str), and values are dictionaries.
+                     The inner dictionaries have employee names (str) as keys and lists of tuples as values.
+                     Each tuple represents a shift with a start time (str) and an end time (str).
+
+    Returns:
+    list of dict: A list of event dictionaries, where each dictionary contains:
+        - 'Subject' (str): The name of the employee.
+        - 'Start date' (str): The date of the shift.
+        - 'Start time' (str): The start time of the shift.
+        - 'End date' (str): The date of the shift (same as 'Start date').
+        - 'End time' (str): The end time of the shift.
+    """
     events = []
     for date, employees in schedule.items():
         for employee, shifts in employees.items():
@@ -92,6 +154,21 @@ def convert_to_events(schedule):
     return events
 
 def write_events_to_csv(events, output_file):
+    """
+    Writes a list of event dictionaries to a CSV file.
+
+    Parameters:
+    events (list of dict): A list of event dictionaries, where each dictionary contains:
+        - 'Subject' (str): The name of the employee.
+        - 'Start date' (str): The date of the shift.
+        - 'Start time' (str): The start time of the shift.
+        - 'End date' (str): The date of the shift (same as 'Start date').
+        - 'End time' (str): The end time of the shift.
+    output_file (str): The path to the output CSV file.
+
+    Returns:
+    None
+    """
     with open(output_file, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['Subject', 'Start date', 'Start time', 'End date', 'End time'])
         writer.writeheader()
@@ -99,6 +176,17 @@ def write_events_to_csv(events, output_file):
             writer.writerow(event)
 
 def to_string(schedule):
+    """
+    Prints the schedule dictionary in a readable string format.
+
+    Parameters:
+    schedule (dict): A dictionary where keys are dates (str), and values are dictionaries.
+                     The inner dictionaries have employee names (str) as keys and lists of tuples as values.
+                     Each tuple represents a shift with a start time (str) and an end time (str).
+
+    Returns:
+    None
+    """
     for date, employees in schedule.items():
         print(f"Date: {date}")
         for employee, shifts in employees.items():
@@ -106,8 +194,21 @@ def to_string(schedule):
             print(f"  Employee: {employee}, Shifts: {shift_str}")
         print()  # Add an empty line for better readability
 
-# Reads the calendar formatted csv file
 def read_events_from_csv(csv_file):
+    """
+    Reads events from a CSV file and returns them as a list of dictionaries.
+
+    Parameters:
+    csv_file (str): The path to the input CSV file.
+
+    Returns:
+    list of dict: A list of event dictionaries, where each dictionary contains:
+        - 'Subject' (str): The name of the employee.
+        - 'Start date' (str): The date of the shift.
+        - 'Start time' (str): The start time of the shift.
+        - 'End date' (str): The date of the shift.
+        - 'End time' (str): The end time of the shift.
+    """
     events = []
     with open(csv_file, mode='r') as file:
         reader = csv.DictReader(file)
@@ -115,10 +216,25 @@ def read_events_from_csv(csv_file):
             events.append(row)
     return events
 
-# Creates ics file
-def create_ics_file(events, output_ics_file):
+def create_ics_file(events, output_ics_file, timezone):
+    """
+    Creates an ICS file from a list of event dictionaries.
+
+    Parameters:
+    events (list of dict): A list of event dictionaries, where each dictionary contains:
+        - 'Subject' (str): The name of the employee.
+        - 'Start date' (str): The start date of the event in the format '%B %d, %Y'.
+        - 'Start time' (str): The start time of the event in the format '%I:%M %p'.
+        - 'End date' (str): The end date of the event in the format '%B %d, %Y'.
+        - 'End time' (str): The end time of the event in the format '%I:%M %p'.
+    output_ics_file (str): The path to the output ICS file.
+    timezone (str): The timezone for the events (e.g., 'America/New_York').
+
+    Returns:
+    None
+    """
     calendar = Calendar()
-    pst = pytz.timezone('America/Los_Angeles') # TODO: Make this option in command line
+    time_zone = pytz.timezone(timezone)
     
     for event in events:
         cal_event = Event()
@@ -130,8 +246,8 @@ def create_ics_file(events, output_ics_file):
         start_datetime = datetime.strptime(start_datetime_str, '%B %d, %Y %I:%M %p')
         end_datetime = datetime.strptime(end_datetime_str, '%B %d, %Y %I:%M %p')
         
-        start_datetime = pst.localize(start_datetime)
-        end_datetime = pst.localize(end_datetime)
+        start_datetime = time_zone.localize(start_datetime)
+        end_datetime = time_zone.localize(end_datetime)
         
         cal_event.begin = start_datetime
         cal_event.end = end_datetime
@@ -141,7 +257,17 @@ def create_ics_file(events, output_ics_file):
     with open(output_ics_file, mode='w') as file:
         file.writelines(calendar)
 
-def main(input_csv):
+def main(input_csv, timezone):
+    """
+    Main function to process a schedule CSV file, convert it to a list of events, write the events to a CSV file, and then create an ICS file.
+
+    Parameters:
+    input_csv (str): The path to the input CSV file containing the schedule.
+    timezone (str): The timezone for the events (e.g., 'America/New_York').
+
+    Returns:
+    None
+    """
     headers, times, data = read_schedule(input_csv)
     schedule = convert_to_nested_dict(headers, times, data)
 
@@ -151,8 +277,9 @@ def main(input_csv):
     time.sleep(1)
 
     formatted_events = read_events_from_csv('output_events.csv')
-    create_ics_file(formatted_events, "output_ics.ics")
+    create_ics_file(formatted_events, "output_ics.ics", timezone) # takes events, writes file, in given timezone
 
 if __name__ == '__main__':
     input_csv = sys.argv[1]
-    main(input_csv)
+    timezone = sys.argv[2]
+    main(input_csv, timezone) # input_file and timezone
