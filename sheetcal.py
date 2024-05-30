@@ -1,10 +1,14 @@
 import sys
 import csv
 import time
+import logging
 from datetime import datetime
 from ics import Calendar, Event
 from datetime import datetime
 import pytz
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def clean_data(headers, times, data):
     """
