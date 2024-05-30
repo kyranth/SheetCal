@@ -98,7 +98,7 @@ def convert_to_nested_dict(headers, times, data):
     schedule = {}
     
     def format_date(date_str):
-        input_format = '%d/%b' # <- the input csv file format
+        input_format = '%d-%b' # <- the input csv file format
         date_obj = datetime.strptime(date_str, input_format)
 
         output_format = '%B %d, 2024' # <- formats the output csv file like this
