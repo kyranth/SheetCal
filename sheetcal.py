@@ -99,7 +99,7 @@ def convert_to_nested_dict(headers, times, data):
     
     def format_date(date_str):
         # Parse the date using the day and month
-        day, month = date_str.split('-')
+        day, month = date_str.split('/')
         
         # Create a datetime object assuming the current year
         date_obj = datetime(year=datetime.now().year, month=int(month), day=int(day))
