@@ -98,11 +98,15 @@ def convert_to_nested_dict(headers, times, data):
     schedule = {}
     
     def format_date(date_str):
-        input_format = '%d-%b' # <- the input csv file format
-        date_obj = datetime.strptime(date_str, input_format)
+        # Parse the date using the day and month
+        day, month = date_str.split('/')
+        
+        # Create a datetime object assuming the current year
+        date_obj = datetime(year=datetime.now().year, month=int(month), day=int(day))
+        
+        # Format the date to MM/DD/YYYY
+        formatted_date = date_obj.strftime('%m/%d/%Y') # <- formats the output csv file like this
 
-        output_format = '%B %d, 2024' # <- formats the output csv file like this
-        formatted_date = date_obj.strftime(output_format)
         return formatted_date
 
     headers = [format_date(date) for date in headers[1:]]  # Skip the first column header
@@ -247,8 +251,8 @@ def create_ics_file(events, output_ics_file, timezone):
         start_datetime_str = f"{event['Start date']} {event['Start time']}"
         end_datetime_str = f"{event['End date']} {event['End time']}"
         
-        start_datetime = datetime.strptime(start_datetime_str, '%B %d, %Y %I:%M %p')
-        end_datetime = datetime.strptime(end_datetime_str, '%B %d, %Y %I:%M %p')
+        start_datetime = datetime.strptime(start_datetime_str, '%m/%d/%Y %I:%M %p')
+        end_datetime = datetime.strptime(end_datetime_str, '%m/%d/%Y %I:%M %p')
         
         start_datetime = time_zone.localize(start_datetime)
         end_datetime = time_zone.localize(end_datetime)
@@ -261,13 +265,13 @@ def create_ics_file(events, output_ics_file, timezone):
     with open(output_ics_file, mode='w') as file:
         file.writelines(calendar)
 
-def main(input_csv, timezone):
+def main(input_csv, timezone='America/Los_Angeles'):
     """
     Main function to process a schedule CSV file, convert it to a list of events, write the events to a CSV file, and then create an ICS file.
 
     Parameters:
     input_csv (str): The path to the input CSV file containing the schedule.
-    timezone (str): The timezone for the events (e.g., 'America/New_York').
+    timezone (str): The timezone for the events (e.g., 'America/Los_Angeles' Default).
 
     Returns:
     None
@@ -285,5 +289,5 @@ def main(input_csv, timezone):
 
 if __name__ == '__main__':
     input_csv = sys.argv[1]
-    timezone = sys.argv[2]
-    main(input_csv, timezone) # input_file and timezone
+    # timezone = sys.argv[2]
+    main(input_csv) # input_file and timezone
